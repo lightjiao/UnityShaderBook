@@ -17,6 +17,14 @@
             #pragma vertex vert
             #pragma fragment frag
 
+            // 使用一个结构体来定义顶点着色器的输入
+            struct a2v {
+                float4 vertex : POSITION;    // POSITION 语义告诉Unity用模型空间的顶点坐标填充
+                float3 normal : NORMAL;      // NORMAL 语义告诉Unity，用模型空间的法线方向填充normal变量
+                float4 texcoord : TEXCOORD0; // TEXCOORD0 语义告诉Unity，用模型的第一套纹理坐标填充 texcoord 变量
+            };
+
+
             // 顶点着色器代码，它是逐顶点执行的：
             // 这个函数的输入 v 包含了这个顶点的位置，这是根据 POSITION 语义指定的。
             //
