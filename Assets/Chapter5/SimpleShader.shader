@@ -24,6 +24,11 @@
                 float4 texcoord : TEXCOORD0; // TEXCOORD0 语义告诉Unity，用模型的第一套纹理坐标填充 texcoord 变量
             };
 
+            // 使用一个结构体来定义顶点着色器的输出
+            struct v2f {
+                float4 pos : SV_POSITION; // SV_POSITION 语义告诉Unity pos里包含了顶点在裁剪空间中的位置信息
+                fixed3 color : COLOR0;    // COLOR0 语义可以存储颜色信息
+            };
 
             // 顶点着色器代码，它是逐顶点执行的：
             // 这个函数的输入 v 包含了这个顶点的位置，这是根据 POSITION 语义指定的。
@@ -36,10 +41,15 @@
             // 
             // 本例中，顶点着色器只包含了一行代码，这一步就是把顶点坐标从模型空间转换到裁剪空间中。
             // UNITY_MATRIX_MVP 矩阵是 Unity内置的 模型⋅观察⋅投影 矩阵
-            float4 vert(float4 v : POSITION) : SV_POSITION {
-                // Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
-                // return mul(UNITY_MATRIX_MVP, v);
-                return UnityObjectToClipPos(v);
+            v2f vert(a2v v) {
+                v2f o;
+                o.pos = UnityObjectToClipPos(v.vertex);
+                
+                // v.normal 包含了顶点的发现方向, 其分量范围在[-1.0, 1.0]
+                // 下面的代码把分量范围映射到里 [0.0, 1.0]
+                // 存储到 o.color 中传递给片元着色器
+                o.color = v.normal * 0.5 + fixed3(0.5, 0.5, 0.5);
+                return o;
             }
 
             // 片元着色器代码：
@@ -51,8 +61,8 @@
             // 
             // 片元着色器中的代码很简单，返回了一个表示白色的fixed4变量。片元着色器输出的颜色每个分量范围
             // 在[0, 1]，其中(0,0,0)表示黑色，(1,1,1)表示白色
-            fixed4 frag() : SV_TARGET {
-                return fixed4(1.0, 1.0, 1.0, 1.0);
+            fixed4 frag(v2f i) : SV_TARGET {
+                return fixed4(i.color, 1.0);
             }
 
             ENDCG
