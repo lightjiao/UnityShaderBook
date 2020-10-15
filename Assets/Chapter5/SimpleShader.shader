@@ -1,6 +1,10 @@
 ﻿Shader "UnityShaderBook/Chapter5/SimpleShader"
 {
     // Properties 语义块不是必须的，我们可以选择不声明任何材质
+    Properties {
+        // 声明一个 Color 类型的属性
+        _Color ("Color Tint", Color) = (1.0, 1.0, 1.0, 1.0)
+    }
 
     // SubShader语义块
     SubShader {
@@ -16,6 +20,9 @@
             // 是任意自定义的合法名字，但我们一般就叫vert和frag来定义这两个函数，因为比较直观
             #pragma vertex vert
             #pragma fragment frag
+
+            // 在CG代码中，我们需要定义一个与属性名称和类型都匹配的变量
+            fixed4 _Color;
 
             // 使用一个结构体来定义顶点着色器的输入
             struct a2v {
@@ -62,7 +69,12 @@
             // 片元着色器中的代码很简单，返回了一个表示白色的fixed4变量。片元着色器输出的颜色每个分量范围
             // 在[0, 1]，其中(0,0,0)表示黑色，(1,1,1)表示白色
             fixed4 frag(v2f i) : SV_TARGET {
-                return fixed4(i.color, 1.0);
+                fixed3 c = i.color;
+
+                // 使用 _Color 属性来控制输出颜色
+
+                c *= _Color.rgb;
+                return fixed4(c, 1.0);
             }
 
             ENDCG
